@@ -8,6 +8,7 @@ import {
   useDeleteItem,
   useUpdateStatus,
 } from "./hook/useTodoItem";
+import Link from "next/link";
 
 export default function TodoPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -158,6 +159,13 @@ export default function TodoPage() {
             </tbody>
           )}
         </table>
+
+        <Link
+          href="/bouns-challenge"
+          className="text-blue-500 underline mt-4 inline-block"
+        >
+          Bouns Challenge
+        </Link>
       </div>
     </>
   );
