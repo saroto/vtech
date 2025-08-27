@@ -1,103 +1,178 @@
-import Image from "next/image";
+"use client";
+import { useDebounce } from "use-debounce";
+import { useState, useEffect } from "react";
+import { Mode } from "../../types/list";
+import Modal from "@/app/components/modal";
+import {
+  useGetItems,
+  useDeleteItem,
+  usePutItem,
+  useUpdateStatus,
+} from "./hook/useTodoItem";
 
-export default function Home() {
+export default function TodoPage() {
+  // const [todosList, setTodosList] = useState<List[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [mode, setMode] = useState<Mode>("add");
+  const [todoId, setTodoId] = useState("");
+  const [search, setSearch] = useState("");
+  const [debouncedSearch] = useDebounce(search, 300);
+  const handleOpenModal = (mode: Mode) => {
+    setMode(mode);
+    setIsModalOpen(true);
+  };
+  // hooks
+  const { todos: todosList, refetch } = useGetItems();
+  const { deleteTodoItem } = useDeleteItem();
+  const { markStatus } = useUpdateStatus();
+
+  const handleSearch = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearch(event.target.value);
+    await refetch();
+  };
+
+  useEffect(() => {
+    if (debouncedSearch.trim() === "") {
+      refetch().catch((error) => {
+        console.error("Error fetching todo list:", error);
+      });
+    }
+  }, []);
+
+  const handleDelete = async (id: string) => {
+    const response = await deleteTodoItem(id);
+    if (response.status === 200) {
+      alert("Todo deleted successfully");
+      await refetch();
+    } else {
+      const errorData = await response.json();
+      alert(`Error deleting todo: ${errorData.error}`);
+    }
+  };
+  const handleMarkComplete = async (id: string) => {
+    const maskAsCompleteResponse = await markStatus(id, true);
+    if (maskAsCompleteResponse.status === 200) {
+      alert("Todo marked as complete");
+      await refetch();
+    }
+  };
+  const handleMarkInComplete = async (id: string) => {
+    const maskAsInCompleteResponse = await markStatus(id, false);
+    if (maskAsInCompleteResponse.status === 200) {
+      alert("Todo marked as incomplete");
+      await refetch();
+    }
+  };
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
+    <>
+      {isModalOpen && (
+        <Modal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          refetchData={refetch}
+          mode={mode as Mode}
+          todoId={todoId}
         />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+      )}
+      <div className="container mx-auto ">
+        <div className="flex justify-between items-center mb-4">
+          <h1>Todo List</h1>
+          <button
+            className="bg-green-500 text-white px-4 py-2 rounded mb-4 cursor-pointer"
+            onClick={() => handleOpenModal("add")}
+          >
+            Add Todo
+          </button>
+          <input
+            type="text"
+            placeholder="Search todos..."
+            className="border border-gray-300 p-2 rounded mb-4"
+            value={search}
+            onChange={(e) => {
+              handleSearch(e);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+              // Optionally, you can fetch the filtered list immediately
+            }}
+          />
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+        <table className="table-auto border-collapse border border-gray-400 w-full">
+          <thead>
+            <tr>
+              <th className="border border-gray-400 px-2 py-1">ID</th>
+              <th className="border border-gray-400 px-2 py-1">Todo</th>
+              <th className="border border-gray-400 px-2 py-1">Completed</th>
+              <th className="border border-gray-400 px-2 py-1">Created At</th>
+              <th className="border border-gray-400 px-2 py-1">Action</th>
+              <th className="border border-gray-400 px-2 py-1">Status</th>
+            </tr>
+          </thead>
+          {todosList.length !== 0 ? (
+            <tbody>
+              {todosList.map((todo) => (
+                <tr
+                  key={todo.id}
+                  className={todo.isCompleted ? "line-through" : ""}
+                >
+                  <td className="border border-gray-400 px-2 py-1">
+                    {todo.id}
+                  </td>
+                  <td className="border border-gray-400 px-2 py-1">
+                    {todo.todo}
+                  </td>
+                  <td className="border border-gray-400 px-2 py-1">
+                    {todo.isCompleted ? "Yes" : "No"}
+                  </td>
+                  <td className="border border-gray-400 px-2 py-1">
+                    {new Date(todo.createdAt).toLocaleString()}
+                  </td>
+                  <td className="border border-gray-400 px-2 py-1">
+                    <button
+                      className="bg-blue-500 text-white px-2 py-1 rounded"
+                      onClick={() => {
+                        handleOpenModal("edit");
+                        setTodoId(todo.id);
+                      }}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      className="bg-red-500 text-white px-2 py-1 rounded ml-2"
+                      onClick={() => handleDelete(todo.id)}
+                    >
+                      Delete
+                    </button>
+                  </td>
+                  <td className="border border-gray-400 px-2 py-1">
+                    <button
+                      className="bg-green-400 text-white px-2 py-1 rounded ml-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                      disabled={todo.isCompleted}
+                      onClick={() => handleMarkComplete(todo.id)}
+                    >
+                      Mark as Complete
+                    </button>
+                    <button
+                      className="bg-yellow-400 text-white px-2 py-1 rounded ml-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                      disabled={!todo.isCompleted}
+                      onClick={() => handleMarkInComplete(todo.id)}
+                    >
+                      Mark as Incomplete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          ) : (
+            <tbody>
+              <tr>
+                <td colSpan={6} className="text-center py-4">
+                  No result. Create a new one instead!
+                </td>
+              </tr>
+            </tbody>
+          )}
+        </table>
+      </div>
+    </>
   );
 }
