@@ -15,23 +15,24 @@ export default function EditRealtime(props: EditRealtimeProps) {
     isCompleted: null,
   });
   //   console.log("props.todoId", props.todoId);
-  const getData = async () => {
-    const { data, error } = await supabase
-      .from("todo")
-      .select("*")
-      .eq("id", props.todoId)
-      .single();
-    if (error) {
-      alert("Error fetching todo: " + error.message);
-      return;
-    }
-    setTodo(data);
-  };
+
   useEffect(() => {
     if (props.isOpen) {
+      const getData = async () => {
+        const { data, error } = await supabase
+          .from("todo")
+          .select("*")
+          .eq("id", props.todoId)
+          .single();
+        if (error) {
+          alert("Error fetching todo: " + error.message);
+          return;
+        }
+        setTodo(data);
+      };
       getData();
     }
-  }, [props.isOpen, props.todoId]); // Added props.todoId to dependencies
+  }, [props.isOpen, props.todoId, supabase]); // Added props.todoId to dependencies
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (todo.todo.trim() === "") {

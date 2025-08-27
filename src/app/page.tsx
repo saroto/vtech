@@ -1,22 +1,19 @@
 "use client";
-import { useDebounce } from "use-debounce";
-import { useState, useEffect } from "react";
+
+import { useState } from "react";
 import { Mode } from "../../types/list";
 import Modal from "@/app/components/modal";
 import {
   useGetItems,
   useDeleteItem,
-  usePutItem,
   useUpdateStatus,
 } from "./hook/useTodoItem";
 
 export default function TodoPage() {
-  // const [todosList, setTodosList] = useState<List[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [mode, setMode] = useState<Mode>("add");
   const [todoId, setTodoId] = useState("");
-  const [search, setSearch] = useState("");
-  const [debouncedSearch] = useDebounce(search, 300);
+
   const handleOpenModal = (mode: Mode) => {
     setMode(mode);
     setIsModalOpen(true);
@@ -26,18 +23,9 @@ export default function TodoPage() {
   const { deleteTodoItem } = useDeleteItem();
   const { markStatus } = useUpdateStatus();
 
-  const handleSearch = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearch(event.target.value);
-    await refetch();
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    refetch(e.target.value);
   };
-
-  useEffect(() => {
-    if (debouncedSearch.trim() === "") {
-      refetch().catch((error) => {
-        console.error("Error fetching todo list:", error);
-      });
-    }
-  }, []);
 
   const handleDelete = async (id: string) => {
     const response = await deleteTodoItem(id);
@@ -88,11 +76,9 @@ export default function TodoPage() {
             type="text"
             placeholder="Search todos..."
             className="border border-gray-300 p-2 rounded mb-4"
-            value={search}
+            // value={search}
             onChange={(e) => {
-              handleSearch(e);
-
-              // Optionally, you can fetch the filtered list immediately
+              handleSearchChange(e);
             }}
           />
         </div>

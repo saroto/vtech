@@ -5,10 +5,14 @@ export function useGetItems() {
   const [todos, setTodos] = useState<List[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<unknown | null>(null);
-  const fetchTodos = async () => {
+  const fetchTodos = async (searchQuery?: string) => {
     try {
       setLoading(true);
-      const response = await fetch("/api/todo");
+      const response = await fetch(
+        `/api/todo${
+          searchQuery ? `?search=${encodeURIComponent(searchQuery)}` : ""
+        }`
+      );
       if (!response.ok) {
         throw new Error("Failed to fetch todos");
       }

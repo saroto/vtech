@@ -1,10 +1,44 @@
 import { todosList } from "../../../../../data/todos-list";
-import { NextRequest } from "next/server";
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
+
+interface Params {
+  id: string;
+}
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
+  if (!id) {
+    return new Response(JSON.stringify({ error: "ID is required" }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+  const todo = todosList.find((item) => item.id === id);
+  if (todo) {
+    return new Response(
+      JSON.stringify({
+        data: todo,
+        message: "Successfully get todo list",
+        status: 200,
+      })
+    );
+  } else {
+    return new Response(
+      JSON.stringify({
+        error: "Todo list not found",
+        status: 404,
+      })
+    );
+  }
+}
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+  console.log(id);
   if (!id) {
     return new Response(JSON.stringify({ error: "ID is required" }), {
       status: 400,
@@ -30,7 +64,7 @@ export async function DELETE(
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
   const { todo, isCompleted, createdAt } = await request.json();
@@ -62,7 +96,7 @@ export async function PUT(
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const { isCompleted } = await request.json();
   const { id } = await params;
@@ -96,28 +130,4 @@ export async function PATCH(
       },
     }
   );
-}
-
-export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
-  const { id } = await params;
-  const todo = todosList.find((item) => item.id === id);
-  if (todo) {
-    return new Response(
-      JSON.stringify({
-        data: todo,
-        message: "Successfully get todo list",
-        status: 200,
-      })
-    );
-  } else {
-    return new Response(
-      JSON.stringify({
-        error: "Todo list not found",
-        status: 404,
-      })
-    );
-  }
 }

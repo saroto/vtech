@@ -17,8 +17,13 @@ export default function Modal(ModalProp: ModalProp) {
     setValue: setEditValue,
   } = useGetItem();
   const { updateTodoItem } = usePutItem();
+
   useEffect(() => {
-    getSingleTodoList(ModalProp.todoId);
+    async function fetchTodo() {
+      await getSingleTodoList(ModalProp.todoId);
+    }
+    fetchTodo();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ModalProp.todoId]);
 
   const handleSubmit = async () => {
@@ -74,7 +79,7 @@ export default function Modal(ModalProp: ModalProp) {
                 <div>
                   <input
                     type="text"
-                    value={editValue?.todo}
+                    value={editValue.todo}
                     onChange={(e) =>
                       setEditValue({
                         ...editValue,

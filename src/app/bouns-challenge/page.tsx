@@ -3,7 +3,7 @@ import Realtime from "@/app/components/realtime";
 export default async function BounsChallenge() {
   const supabase = await createClient();
 
-  const { data: todo, error } = await supabase.from("todo").select("*");
+  const { data: todo } = await supabase.from("todo").select("*");
 
   return (
     <div>
