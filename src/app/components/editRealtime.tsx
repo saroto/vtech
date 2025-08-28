@@ -1,6 +1,7 @@
 "use client";
 import { createClient } from "../../../utils/supabase/client";
 import { useEffect, useState } from "react";
+import { GetSingleTodo, updateTodoItem } from "@/app/hook/useSupabase";
 interface EditRealtimeProps {
   isOpen: boolean;
   onClose: () => void;
@@ -9,6 +10,7 @@ interface EditRealtimeProps {
 
 export default function EditRealtime(props: EditRealtimeProps) {
   const supabase = createClient();
+
   const [todo, setTodo] = useState({
     id: "",
     todo: "",
@@ -18,15 +20,7 @@ export default function EditRealtime(props: EditRealtimeProps) {
   useEffect(() => {
     if (props.isOpen) {
       const getData = async () => {
-        const { data, error } = await supabase
-          .from("todo")
-          .select("*")
-          .eq("id", props.todoId)
-          .single();
-        if (error) {
-          alert("Error fetching todo: " + error.message);
-          return;
-        }
+        const { data } = await GetSingleTodo(props.todoId);
         setTodo(data);
       };
       getData();
@@ -40,13 +34,13 @@ export default function EditRealtime(props: EditRealtimeProps) {
       return;
     }
 
-    const { error } = await supabase
-      .from("todo")
-      .update({ todo: todo.todo, isCompleted: todo.isCompleted })
-      .eq("id", todo.id);
+    const { error } = await updateTodoItem(
+      todo.todo,
+      todo.isCompleted,
+      todo.id
+    );
     if (error) {
-      alert("Todo already exists");
-      return;
+      return alert("Error updating todo: " + error);
     }
     alert("Todo updated successfully");
 

@@ -3,11 +3,9 @@ import { List } from "../../../types/list";
 
 export function useGetItems() {
   const [todos, setTodos] = useState<List[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<unknown | null>(null);
+
   const fetchTodos = async (searchQuery?: string, status?: string) => {
     try {
-      setLoading(true);
       const url = `/api/todo${searchQuery ? `?search=${searchQuery}` : ""}${
         status ? `${searchQuery ? "&" : "?"}status=${status}` : ""
       }`;
@@ -19,15 +17,17 @@ export function useGetItems() {
       const data = await response.json();
       setTodos(data.data);
     } catch (err: unknown) {
-      setError(err || "An error occurred");
-    } finally {
-      setLoading(false);
+      if (err instanceof Error) {
+        console.error("Error fetching todos:", err.message);
+      } else {
+        console.error("Unknown error fetching todos");
+      }
     }
   };
   useEffect(() => {
     fetchTodos();
   }, []);
-  return { todos, loading, error, refetch: fetchTodos };
+  return { todos, refetch: fetchTodos };
 }
 
 export function usePostItems(todo: string) {

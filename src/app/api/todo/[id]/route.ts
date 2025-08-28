@@ -1,3 +1,4 @@
+"use server";
 import { todosList } from "../../../../../data/todos-list";
 
 export async function GET(

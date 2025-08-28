@@ -1,3 +1,4 @@
+"use server";
 import { todosList } from "../../../../data/todos-list";
 import { NextRequest } from "next/server";
 import { generatedUUID } from "../../../../utils/generateUuid";

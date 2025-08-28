@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { List } from "../../../types/list";
 import { createClient } from "../../../utils/supabase/client";
+import { PostTodo } from "../hook/useSupabase";
 import EditRealtime from "./editRealtime";
 
 export default function Realtime({ data }: { data: List[] }) {
@@ -54,11 +55,9 @@ export default function Realtime({ data }: { data: List[] }) {
       return;
     }
 
-    const { error } = await supabase
-      .from("todo")
-      .insert({ todo: newTodo, isCompleted: false });
+    const { error } = await PostTodo(newTodo);
     if (error) {
-      alert("Error creating todo: " + error.message);
+      alert("Error creating todo: " + error);
       return;
     }
     setNewTodo("");
