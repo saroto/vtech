@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import { Mode } from "../../types/list";
 import Modal from "@/app/components/modal";
@@ -14,35 +13,35 @@ export default function TodoPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [mode, setMode] = useState<Mode>("add");
   const [todoId, setTodoId] = useState("");
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState("");
+  // hooks
+  const { todos: todosList, refetch: refetch } = useGetItems();
 
+  const { deleteTodoItem } = useDeleteItem();
+  const { markStatus } = useUpdateStatus();
   const handleOpenModal = (mode: Mode) => {
     setMode(mode);
     setIsModalOpen(true);
   };
-  // hooks
-  const { todos: todosList, refetch } = useGetItems();
-  const { deleteTodoItem } = useDeleteItem();
-  const { markStatus } = useUpdateStatus();
-
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    refetch(e.target.value);
-  };
 
   const handleDelete = async (id: string) => {
-    const response = await deleteTodoItem(id);
-    if (response.status === 200) {
+    const deleteTodo = await deleteTodoItem(id);
+    if (deleteTodo.status === 200) {
       alert("Todo deleted successfully");
       await refetch();
-    } else {
-      const errorData = await response.json();
-      alert(`Error deleting todo: ${errorData.error}`);
+      setSearch("");
+      setStatus("");
     }
   };
+
   const handleMarkComplete = async (id: string) => {
     const maskAsCompleteResponse = await markStatus(id, true);
     if (maskAsCompleteResponse.status === 200) {
       alert("Todo marked as complete");
       await refetch();
+      setSearch("");
+      setStatus("");
     }
   };
   const handleMarkInComplete = async (id: string) => {
@@ -50,6 +49,8 @@ export default function TodoPage() {
     if (maskAsInCompleteResponse.status === 200) {
       alert("Todo marked as incomplete");
       await refetch();
+      setSearch("");
+      setStatus("");
     }
   };
 
@@ -73,20 +74,36 @@ export default function TodoPage() {
           >
             Add Todo
           </button>
-          <input
-            type="text"
-            placeholder="Search todos..."
-            className="border border-gray-300 p-2 rounded mb-4"
-            // value={search}
-            onChange={(e) => {
-              handleSearchChange(e);
-            }}
-          />
+          <div className="ml-4">
+            <input
+              type="search"
+              placeholder="Search todos..."
+              className="border border-gray-300 p-2 rounded mb-4"
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                refetch(e.target.value, status);
+              }}
+            />
+            <select
+              className="border border-gray-300 p-2 rounded mb-4 ml-2"
+              onChange={(e) => {
+                setStatus(e.target.value);
+                refetch(search, e.target.value);
+              }}
+              // defaultValue=""
+              value={status}
+            >
+              <option value="">All</option>
+              <option value="complete">Completed</option>
+              <option value="incomplete">Incompleted</option>
+            </select>
+          </div>
         </div>
         <table className="table-auto border-collapse border border-gray-400 w-full">
           <thead>
             <tr>
-              <th className="border border-gray-400 px-2 py-1">ID</th>
+              <th className="border border-gray-400 px-2 py-1">No</th>
               <th className="border border-gray-400 px-2 py-1">Todo</th>
               <th className="border border-gray-400 px-2 py-1">Completed</th>
               <th className="border border-gray-400 px-2 py-1">Created At</th>
@@ -96,13 +113,13 @@ export default function TodoPage() {
           </thead>
           {todosList.length !== 0 ? (
             <tbody>
-              {todosList.map((todo) => (
+              {todosList.map((todo, index) => (
                 <tr
                   key={todo.id}
                   className={todo.isCompleted ? "line-through" : ""}
                 >
                   <td className="border border-gray-400 px-2 py-1">
-                    {todo.id}
+                    {index + 1}
                   </td>
                   <td className="border border-gray-400 px-2 py-1">
                     {todo.todo}

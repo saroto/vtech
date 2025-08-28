@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { List, Mode } from "../../../types/list";
 import { usePostItems, useGetItem, usePutItem } from "../hook/useTodoItem";
+
 interface ModalProp {
   isOpen: boolean;
   todoId: string;
@@ -26,7 +27,8 @@ export default function Modal(ModalProp: ModalProp) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ModalProp.todoId]);
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (ModalProp.mode === "add") {
       if (todo.trim() === "") {
         alert("Todo cannot be empty");
@@ -37,8 +39,8 @@ export default function Modal(ModalProp: ModalProp) {
       if (create.status === 400) {
         return alert("Todo already exists");
       } else {
-        await ModalProp.refetchData();
         setTodo("");
+        await ModalProp.refetchData();
         ModalProp.onClose();
         return alert("Todo added successfully");
       }
@@ -50,6 +52,8 @@ export default function Modal(ModalProp: ModalProp) {
         createdAt: new Date().toISOString(),
       };
       await updateTodoItem(todoToUpdate, ModalProp.todoId);
+      alert("Todo updated successfully");
+      await ModalProp.refetchData();
       setEditValue(null);
       ModalProp.onClose();
     }

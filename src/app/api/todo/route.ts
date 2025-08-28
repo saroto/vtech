@@ -4,26 +4,34 @@ import { generatedUUID } from "../../../../utils/generateUuid";
 export async function GET(request: NextRequest) {
   const params = request.nextUrl.searchParams;
 
-  const searchIterm = params.get("search");
-
-  if (searchIterm) {
-    const filteredTodos = todosList.filter((item) =>
-      item.todo.toLowerCase().includes(searchIterm.toLowerCase())
+  const searchItem = params.get("search");
+  const status = params.get("status");
+  let filteredTodos = todosList;
+  if (searchItem) {
+    filteredTodos = filteredTodos.filter((item) =>
+      item.todo.toLowerCase().includes(searchItem.toLowerCase())
     );
-    return new Response(JSON.stringify(filteredTodos), {
-      status: 200,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-  } else {
-    return new Response(JSON.stringify(todosList), {
-      status: 200,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
   }
+
+  if (status) {
+    const isCompleted = status === "complete";
+    filteredTodos = filteredTodos.filter(
+      (item) => item.isCompleted === isCompleted
+    );
+  }
+  console.log("Filtered Todos:", filteredTodos); // Debugging line
+  return new Response(
+    JSON.stringify({
+      data: filteredTodos,
+      message: filteredTodos.length
+        ? "Todos fetched successfully"
+        : "No todos found",
+    }),
+    {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    }
+  );
 }
 
 export async function POST(request: NextRequest) {

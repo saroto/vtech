@@ -1,8 +1,5 @@
 import { todosList } from "../../../../../data/todos-list";
 
-interface Params {
-  id: string;
-}
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
