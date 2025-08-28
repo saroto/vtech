@@ -12,9 +12,8 @@ export default function EditRealtime(props: EditRealtimeProps) {
   const [todo, setTodo] = useState({
     id: "",
     todo: "",
-    isCompleted: null,
+    isCompleted: false,
   });
-  //   console.log("props.todoId", props.todoId);
 
   useEffect(() => {
     if (props.isOpen) {
@@ -33,6 +32,7 @@ export default function EditRealtime(props: EditRealtimeProps) {
       getData();
     }
   }, [props.isOpen, props.todoId, supabase]); // Added props.todoId to dependencies
+
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (todo.todo.trim() === "") {
@@ -41,7 +41,7 @@ export default function EditRealtime(props: EditRealtimeProps) {
     }
     const { error } = await supabase
       .from("todo")
-      .update({ todo: todo.todo })
+      .update({ todo: todo.todo, isCompleted: todo.isCompleted })
       .eq("id", todo.id);
     if (error) {
       alert("Error updating todo: " + error.message);
@@ -62,15 +62,32 @@ export default function EditRealtime(props: EditRealtimeProps) {
       >
         <h2 className="text-xl font-bold mb-4">Edit Todo</h2>
         <form onSubmit={handleUpdate}>
-          <div>
-            <input
-              type="text"
-              name="todo"
-              placeholder="Edit your todo"
-              value={todo.todo}
-              onChange={(e) => setTodo({ ...todo, todo: e.target.value })}
-            />
-          </div>
+          {todo && (
+            <div>
+              <input
+                className="border border-gray-300 p-2 rounded w-full"
+                type="text"
+                name="todo"
+                placeholder="Edit your todo"
+                value={todo.todo}
+                onChange={(e) => setTodo({ ...todo, todo: e.target.value })}
+              />
+              <input
+                type="radio"
+                name="status"
+                checked={todo.isCompleted === true}
+                onChange={() => setTodo({ ...todo, isCompleted: true })}
+              />{" "}
+              Completed
+              <input
+                type="radio"
+                name="status"
+                checked={todo.isCompleted === false}
+                onChange={() => setTodo({ ...todo, isCompleted: false })}
+              />{" "}
+              Incomplete
+            </div>
+          )}
           <div className="mt-4 flex justify-end">
             <button
               type="button"

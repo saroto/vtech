@@ -101,7 +101,10 @@ export default function Realtime({ data }: { data: List[] }) {
             </thead>
             <tbody>
               {todos.map((todo, index) => (
-                <tr key={index}>
+                <tr
+                  key={index}
+                  className={todo.isCompleted ? "line-through" : ""}
+                >
                   <td className="border border-gray-400 px-2 py-1">
                     {todo.id}
                   </td>
