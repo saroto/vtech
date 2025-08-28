@@ -38,7 +38,6 @@ export default function Realtime({ data }: { data: List[] }) {
           });
         }
       )
-
       .subscribe();
     return () => {
       realtime.unsubscribe();
@@ -50,6 +49,11 @@ export default function Realtime({ data }: { data: List[] }) {
       alert("Todo cannot be empty");
       return;
     }
+    if (todos.find((todo) => todo.todo === newTodo.trim())) {
+      alert("Todo already exists");
+      return;
+    }
+
     const { error } = await supabase
       .from("todo")
       .insert({ todo: newTodo, isCompleted: false });

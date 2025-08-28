@@ -39,12 +39,13 @@ export default function EditRealtime(props: EditRealtimeProps) {
       alert("Todo cannot be empty");
       return;
     }
+
     const { error } = await supabase
       .from("todo")
       .update({ todo: todo.todo, isCompleted: todo.isCompleted })
       .eq("id", todo.id);
     if (error) {
-      alert("Error updating todo: " + error.message);
+      alert("Todo already exists");
       return;
     }
     alert("Todo updated successfully");

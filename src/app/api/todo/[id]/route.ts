@@ -66,6 +66,20 @@ export async function PUT(
   const { id } = await params;
   const { todo, isCompleted, createdAt } = await request.json();
   const index = todosList.findIndex((item) => item.id === id);
+  if (
+    todosList.find((item) => item.todo.toLowerCase() === todo.toLowerCase())
+  ) {
+    return new Response(
+      JSON.stringify({ error: "Todo already exists", status: 400 }),
+      {
+        status: 400,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+  }
+
   if (index !== -1 && todo && typeof isCompleted === "boolean") {
     todosList[index] = {
       ...todosList[index],

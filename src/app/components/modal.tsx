@@ -51,11 +51,16 @@ export default function Modal(ModalProp: ModalProp) {
         isCompleted: editValue?.isCompleted || false,
         createdAt: new Date().toISOString(),
       };
-      await updateTodoItem(todoToUpdate, ModalProp.todoId);
-      alert("Todo updated successfully");
-      await ModalProp.refetchData();
-      setEditValue(null);
-      ModalProp.onClose();
+
+      const update = await updateTodoItem(todoToUpdate, ModalProp.todoId);
+      if (update.status === 400) {
+        return alert("Todo already exists");
+      } else {
+        alert("Todo updated successfully");
+        await ModalProp.refetchData();
+        setEditValue(null);
+        ModalProp.onClose();
+      }
     }
   };
 
