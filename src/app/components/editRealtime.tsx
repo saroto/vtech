@@ -2,6 +2,7 @@
 import { createClient } from "../../../utils/supabase/client";
 import { useEffect, useState } from "react";
 import { GetSingleTodo, updateTodoItem } from "@/app/hook/useSupabase";
+import { List } from "../../../types/list";
 interface EditRealtimeProps {
   isOpen: boolean;
   onClose: () => void;
@@ -11,11 +12,7 @@ interface EditRealtimeProps {
 export default function EditRealtime(props: EditRealtimeProps) {
   const supabase = createClient();
 
-  const [todo, setTodo] = useState({
-    id: "",
-    todo: "",
-    isCompleted: false,
-  });
+  const [todo, setTodo] = useState<List | null>(null);
 
   useEffect(() => {
     if (props.isOpen) {
@@ -25,19 +22,19 @@ export default function EditRealtime(props: EditRealtimeProps) {
       };
       getData();
     }
-  }, [props.isOpen, props.todoId, supabase]); // Added props.todoId to dependencies
+  }, [props.isOpen, props.todoId, supabase]);
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (todo.todo.trim() === "") {
+    if (todo?.todo.trim() === "") {
       alert("Todo cannot be empty");
       return;
     }
 
     const { error } = await updateTodoItem(
-      todo.todo,
-      todo.isCompleted,
-      todo.id
+      todo?.todo || "",
+      todo?.isCompleted || false,
+      props.todoId
     );
     if (error) {
       return alert("Error updating todo: " + error);
@@ -46,6 +43,9 @@ export default function EditRealtime(props: EditRealtimeProps) {
 
     props.onClose();
   };
+  if (!todo) {
+    return <div>Loading...</div>;
+  }
   return (
     <div
       className="fixed inset-0 flex items-center justify-center bg-opacity-50"
