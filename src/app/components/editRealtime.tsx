@@ -43,9 +43,7 @@ export default function EditRealtime(props: EditRealtimeProps) {
 
     props.onClose();
   };
-  if (!todo) {
-    return <div>Loading...</div>;
-  }
+
   return (
     <div
       className="fixed inset-0 flex items-center justify-center bg-opacity-50"
@@ -57,6 +55,7 @@ export default function EditRealtime(props: EditRealtimeProps) {
       >
         <h2 className="text-xl font-bold mb-4">Edit Todo</h2>
         <form onSubmit={handleUpdate}>
+          {!todo && <p>Loading...</p>}
           {todo && (
             <div>
               <input
